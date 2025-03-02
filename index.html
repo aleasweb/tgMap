@@ -5,7 +5,6 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>City Map</title>
 	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-awesome-markers/2.0.2/leaflet.awesome-markers.css" />
 </head>
 <body>
 	<style>
@@ -26,7 +25,6 @@
 	<div id="map" style="height: 800px; width: 100%;"></div>
 	<script src="https://telegram.org/js/telegram-web-app.js"></script>
 	<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-awesome-markers/2.0.2/leaflet.awesome-markers.min.js"></script>
 	<script>
 	// Инициализация карты (используем OpenStreetMap)
 	let map = L.map('map').setView([53.1959, 45.0183], 5); // Начальные координаты
@@ -36,37 +34,37 @@
 	}).addTo(map);
 	
 	map.attributionControl.setPrefix(false)
+		
+	const greenIcon = L.icon({
+		iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+		iconSize: [25, 41],
+		iconAnchor: [12, 41],
+	});
+	const greyIcon = L.icon({
+		iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-grey.png',
+		iconSize: [25, 41],
+		iconAnchor: [12, 41],
+	});
 	
-	const greenIcon = L.AwesomeMarkers.icon({
-		icon: 'circle',
-		markerColor: 'green',
-		prefix: 'fa',
-	});
-	const grayIcon = L.AwesomeMarkers.icon({
-		icon: 'circle',
-		markerColor: 'gray',
-		prefix: 'fa',
-	});
-
 	// Загрузка данных с сервера
 	async function loadCities() {
 	  try {
-		const response = await fetch('https://raw.githubusercontent.com/aleasweb/tgMap/main/cities.json');
+		const response = await fetch('https://aleasweb.github.io/tgMap/cities.json');
 		const data = await response.json();
 
 		if (data.list && data.visited) {
-		  data.cities.forEach(city => {
-			const { name, lat, lng } = city;
+		  data.visited.forEach(city => {
+			const { name, lat, lng } = city;			
 			L.marker([lat, lng], { icon: greenIcon }).addTo(map)
-			  .bindPopup(name); // Добавляем маркер с названием города
+			  .bindPopup(name); 
 		  });
 		}
 		
 		if (data.list && data.notvisited) {
-		  data.cities.forEach(city => {
+		  data.notvisited.forEach(city => {
 			const { name, lat, lng } = city;
-			L.marker([lat, lng], { icon: grayIcon }).addTo(map)
-			  .bindPopup(name); // Добавляем маркер с названием города
+			L.marker([lat, lng], { icon: greyIcon }).addTo(map)
+			  .bindPopup(name); 
 		  });
 		}
 	  } catch (error) {
