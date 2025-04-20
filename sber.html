@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Telegram Cities Map</title>    
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU"></script>	
+</head>
+<body>
+<style>
+#map {
+    width: 100%;
+    height: 100%;
+}
+#stats {
+	position: fixed;
+	top: 31px;
+	left: 53px;
+	background: rgba(255, 255, 255, 0.9);
+	padding: 10px 15px;
+	border-radius: 5px;
+	box-shadow: 0 0 10px rgba(0,0,0,0.2);
+	z-index: 1000;
+	font-weight: bold;
+	height: 15px;
+	width 150px;
+	color: green;
+}
+</style>
+<script>
+// Настройка API карт
+ymaps.ready(init);
+
+let visitedCount = 0; // Количество посещенных городов
+let totalCities = 0;  // Общее число городов
+
+async function init() {
+    const apiUrl = 'https://aleasweb.github.io/tgMap/cities.json';
+    
+    try {
+        const response = await fetch(apiUrl);
+        if (!response.ok) throw new Error(`HTTP ошибка! Код статуса: ${response.status}`);
+        const data = await response.json();
+        
+        createMap(data);		
+    } catch (err) {
+        console.error(err.message);
+    }
+}
+
+// Цветовые схемы маркеров
+const greenIcon = {
+	iconLayout: 'default#image',
+	iconImageHref: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png', // путь к зеленому маркеру
+	iconImageSize: [30, 42],
+	iconImageOffset: [-15, -42]
+};
+
+const greyIcon = {
+	iconLayout: 'default#image',
+	iconImageHref: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-grey.png', // путь к серому маркеру
+	iconImageSize: [30, 42],
+	iconImageOffset: [-15, -42]
+};
+
+// Функция создания карты
+function createMap({ list, visited, notvisited }) {
+    const mapCenter = [53.1959, 45.0183];
+	const controls = ['zoomControl'];
+    const myMap = new ymaps.Map("map", {
+        center: mapCenter,
+        zoom: 5,
+		controls: controls
+    });
+
+    // Коллекция объектов для хранения точек
+    const geoCollection = new ymaps.GeoObjectCollection();
+
+    // Проход по массиву посещённых городов
+    visited.forEach((city) => {
+        addCityMarker(myMap, city, true);
+    });
+
+    // Проход по массиву непросмотренных городов
+    notvisited.forEach((city) => {
+        addCityMarker(myMap, city, false);
+    });
+	updateVisitedStats();    
+}
+
+// Функция добавляет город на карту
+function addCityMarker(map, city, isVisited) {
+    const markerOptions = isVisited ? greenIcon : greyIcon;
+    const point = new ymaps.Placemark(
+        [parseFloat(city.lat), parseFloat(city.lng)],
+        {hintContent: `${city.name}, ${city.region}`},
+        markerOptions
+    );
+
+    map.geoObjects.add(point);
+
+    if (isVisited) {
+        visitedCount++;
+    }
+    totalCities++;
+}
+
+// Обновление статистики посещаемых городов
+function updateVisitedStats() {
+console.log(`Посещено ${visitedCount} из ${totalCities}`)
+    document.getElementById('stats').innerText = `Посещено ${visitedCount} из ${totalCities}`;
+}
+</script>
+<div id="stats" style="margin-bottom: 10px; text-align: center; font-size: large;"> </div>
+<div id="map" style="width: 100%; height: 100vh;"></div>
+</body>
+</html>
