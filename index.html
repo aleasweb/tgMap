@@ -64,12 +64,11 @@ const greyIcon = {
 
 // Функция создания карты
 function createMap({ list, visited, notvisited }) {
-    // Центруем карту на Москву
-    const mapCenter = [55.75, 37.6];
-	const controls = ['zoomControl'];  // Оставляем только контроль масштабирования
+    const mapCenter = [53.1959, 45.0183];
+	const controls = ['zoomControl'];
     const myMap = new ymaps.Map("map", {
         center: mapCenter,
-        zoom: 6,
+        zoom: 5,
 		controls: controls
     });
 
